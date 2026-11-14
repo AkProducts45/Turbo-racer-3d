@@ -1,48 +1,76 @@
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AK Beach Buggy</title>
-<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:#87ceeb;overflow:hidden;text-align:center}
-#top{display:flex;justify-content:space-between;padding:10px 15px;background:#ff6b00;color:#fff;font-weight:bold;font-size:15px}
-#top b{color:#ffe600}
-#game{position:relative;width:100%;max-width:420px;height:520px;margin:5px auto;background:linear-gradient(#87ceeb 0%, #ffeaa7 30%, #fdcb6e 100%);overflow:hidden;border:4px solid #ff6b00;border-radius:15px}
-#sandL,#sandR{position:absolute;top:0;bottom:0;width:65px;background:#fdcb6e;z-index:1}
-#sandL{left:0}#sandR{right:0}
-#road{position:absolute;left:50%;transform:translateX(-50%);width:290px;height:100%;background:#555;border-left:5px solid #fff;border-right:5px solid #fff;z-index:2}
-.palm{position:absolute;font-size:32px;z-index:3}
-.line{position:absolute;left:50%;transform:translateX(-50%);width:8px;height:50px;background:#ffe600;z-index:2}
-#player{position:absolute;bottom:25px;left:165px;width:60px;height:95px;background:#ff3838;border-radius:15px 15px 5px 5px;font-size:42px;line-height:95px;z-index:10;box-shadow:0 0 20px #ff3838;transition:0.08s}
-.enemy,.coin,.power{position:absolute;border-radius:12px;text-align:center;z-index:5}
-.enemy{width:60px;height:95px;background:#3498db;font-size:42px;line-height:95px}
-.coin{width:42px;height:42px;background:gold;border-radius:50%;font-size:24px;line-height:42px;box-shadow:0 0 15px gold}
-.power{width:50px;height:50px;background:#a55eea;border-radius:50%;font-size:28px;line-height:50px;box-shadow:0 0 15px #a55eea}
-#controls{display:flex;justify-content:center;gap:12px;margin-top:5px}
-#controls button{width:72px;height:72px;border-radius:50%;border:0;font-size:30px;background:#333;color:#fff}
-#powerBtn{background:#a55eea!important;box-shadow:0 0 20px #a55eea}
-#startBtn{background:#ff6b00;border:0;padding:14px 35px;border-radius:30px;color:#fff;font-size:18px;font-weight:bold;margin-top:8px}
-#over{position:absolute;top:30%;left:10px;right:10px;background:rgba(0,0,0,.92);padding:20px;display:none;z-index:30;border-radius:15px;border:3px solid #ff6b00;color:#fff}
-#msg{position:absolute;top:10px;left:0;right:0;font-size:22px;font-weight:bold;color:#ff3838;z-index:20;text-shadow:2px 2px 0 #fff}
-#powerBar{position:absolute;top:45px;left:10px;right:10px;background:#fff;border-radius:10px;padding:5px;font-size:13px;color:#000;z-index:20}
+<title>AK Beach Buggy Race</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:#000;color:#fff;overflow:hidden;text-align:center}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px;background:rgba(0,0,0,.6);z-index:10;font-weight:bold}
+#hud b{color:#ffe600}
+#msg{position:fixed;top:60px;left:0;right:0;z-index:10;font-size:22px;font-weight:bold;color:#ffe600;text-shadow:0 0 10px #000}
+#controls{position:fixed;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:12px;z-index:10}
+#controls button{width:75px;height:75px;border-radius:50%;border:2px solid #fff;font-size:30px;background:rgba(0,0,0,.5);color:#fff}
+#powerBtn{background:#a55eea!important}
+#start{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:20;background:#ff6b00;border:0;padding:16px 35px;border-radius:30px;color:#fff;font-size:20px;font-weight:bold}
+#over{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);z-index:20;background:rgba(0,0,0,.92);padding:25px;border-radius:20px;border:3px solid #ff6b00;display:none}
 </style></head><body>
-<div id="top"><span>🪙 <b id="coins">0</b></span><span>SCORE: <b id="score">0</b></span><span>❤️ <b id="lives">3</b></span><span>🏆 <b id="pos">1st</b></span></div>
-<h2 style="color:#d35400">🏖️ AK BEACH BUGGY 🚜</h2>
-<div id="game"><div id="sandL"></div><div id="sandR"></div><div id="road"></div><div id="msg"></div><div id="powerBar">⚡ POWER: <b id="power">None</b> - Power Box uthao!</div><div id="player">🚜</div>
-<div id="over"><h2>🏁 RACE KHATAM!</h2><p style="margin:12px">Score: <b id="finalScore">0</b> | Coins: <b id="finalCoins">0</b></p><button id="startBtn" onclick="startGame()">🔄 DOBARA RACE</button></div></div>
-<div id="controls"><button onpointerdown="ml=true" onpointerup="ml=false" onpointerleave="ml=false">◀️</button><button id="powerBtn" onclick="usePower()">⚡</button><button onpointerdown="mr=true" onpointerup="mr=false" onpointerleave="mr=false">▶️</button></div>
-<button id="startBtn" onclick="startGame()">▶️ RACE START</button>
+<div id="hud"><span>POS: <b id="pos">4/4</b></span><span>LAP: <b id="lap">1/3</b></span><span>🪙 <b id="coins">0</b></span><span>POWER: <b id="power">None</b></span></div>
+<div id="msg">🏖️ AK BEACH BUGGY RACE</div>
+<button id="start" onclick="startGame()">▶️ RACE START</button>
+<div id="over"><h2 id="result">🏆 YOU WIN!</h2><p style="margin:12px">Coins: <b id="finalCoins">0</b></p><button onclick="startGame()" style="background:#ff6b00;border:0;padding:12px 25px;border-radius:20px;color:#fff;font-weight:bold">🔄 DOBARA RACE</button></div>
+<div id="controls"><button onpointerdown="left=true" onpointerup="left=false">◀️</button><button id="powerBtn" onclick="usePower()">⚡</button><button onpointerdown="right=true" onpointerup="right=false">▶️</button></div>
 <script>
-let player=document.getElementById('player'),game=document.getElementById('game');
-let score=0,coins=0,lives=3,playing=false,ml=false,mr=false,px=165,curPower='None',speed=5,boost=0,shield=false;
-let enemies=[],coinsArr=[],powers=[],lines=[],palms=[];
-for(let i=0;i<5;i++){let l=document.createElement('div');l.className='line';l.style.top=(i*120)+'px';game.appendChild(l);lines.push(l);}
-for(let i=0;i<6;i++){let p=document.createElement('div');p.className='palm';p.textContent=Math.random()>0.5?'🌴':'🌊';p.style.top=(i*90)+'px';p.style.left=Math.random()>0.5?'5px':'375px';game.appendChild(p);palms.push(p);}
-function showMsg(t){let m=document.getElementById('msg');m.textContent=t;setTimeout(()=>m.textContent='',1400);}
-function startGame(){playing=true;score=0;coins=0;lives=3;px=165;curPower='None';boost=0;shield=false;
-enemies.forEach(e=>e.el.remove());coinsArr.forEach(c=>c.el.remove());powers.forEach(p=>p.el.remove());enemies=[];coinsArr=[];powers=[];
-document.getElementById('over').style.display='none';document.getElementById('power').textContent='None';showMsg('🚦 READY... GO BEACH!');requestAnimationFrame(loop);}
-function spawnEnemy(){let e=document.createElement('div');e.className='enemy';e.innerHTML=['🚙','🛺','🚕','🚓'][Math.floor(Math.random()*4)];let x=[15,105,195][Math.floor(Math.random()*3)];e.style.left=x+'px';e.style.top='-100px';game.appendChild(e);enemies.push({el:e,y:-100,x:x});}
-function spawnCoin(){let c=document.createElement('div');c.className='coin';c.innerHTML='🪙';let x=[20,110,200][Math.floor(Math.random()*3)];c.style.left=x+'px';c.style.top='-40px';game.appendChild(c);coinsArr.push({el:c,y:-40,x:x});}
-function spawnPower(){let p=document.createElement('div');p.className='power';p.innerHTML='🎁';let x=[20,110,200][Math.floor(Math.random()*3)];p.style.left=x+'px';p.style.top='-50px';game.appendChild(p);powers.push({el:p,y:-50,x:x});}
+let scene,camera,renderer,player,opponents=[],powerBoxes=[],coinsArr=[],palms=[],speed=0,playing=false,left=false,right=false,px=0,lap=1,totalDist=0,oppDist=[0,0,0],coins=0,curPower='None',frame=0;
+function makeBuggy(color){
+ let g=new THREE.Group();
+ let body=new THREE.Mesh(new THREE.BoxGeometry(2,0.7,3.6),new THREE.MeshLambertMaterial({color:color})); body.position.y=0.7; g.add(body);
+ let seat=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.8,1),new THREE.MeshLambertMaterial({color:0x222222})); seat.position.y=1.3; seat.position.z=0.3; g.add(seat);
+ // Roll cage
+ let cage=new THREE.Mesh(new THREE.BoxGeometry(1.7,0.8,0.15),new THREE.MeshLambertMaterial({color:0x000000})); cage.position.set(0,1.8,-0.4); g.add(cage);
+ // Big Buggy Wheels - Beach Buggy style
+ let wg=new THREE.CylinderGeometry(0.55,0.55,0.5,14); let wm=new THREE.MeshLambertMaterial({color:0x111111});
+ [[-1.2,1.3],[1.2,1.3],[-1.2,-1.3],[1.2,-1.3]].forEach(p=>{let w=new THREE.Mesh(wg,wm); w.rotation.z=Math.PI/2; w.position.set(p[0],0.55,p[1]); g.add(w);});
+ return g;
+}
+function init(){
+ scene=new THREE.Scene(); scene.background=new THREE.Color(0x87ceeb); scene.fog=new THREE.Fog(0x87ceeb,40,150);
+ camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,300); renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(innerWidth,innerHeight); document.body.appendChild(renderer.domElement);
+ scene.add(new THREE.AmbientLight(0xffffff,0.9)); let sun=new THREE.DirectionalLight(0xffffff,0.7); sun.position.set(10,20,10); scene.add(sun);
+ // Beach Sand
+ let sand=new THREE.Mesh(new THREE.PlaneGeometry(300,400),new THREE.MeshLambertMaterial({color:0xfdcb6e})); sand.rotation.x=-Math.PI/2; sand.position.z=-100; scene.add(sand);
+ // Sea - left side
+ let sea=new THREE.Mesh(new THREE.PlaneGeometry(60,400),new THREE.MeshLambertMaterial({color:0x00bfff})); sea.rotation.x=-Math.PI/2; sea.position.set(-35,0.1,-100); scene.add(sea);
+ // Road - sand track
+ let road=new THREE.Mesh(new THREE.PlaneGeometry(13,400),new THREE.MeshLambertMaterial({color:0xe17055})); road.rotation.x=-Math.PI/2; road.position.z=-100; scene.add(road);
+ player=makeBuggy(0xff0000); scene.add(player);
+ // Opponents - Beach Buggy style
+ let cols=[0x0000ff,0x00ff00,0xffff00]; cols.forEach((c,i)=>{let o=makeBuggy(c); o.position.set((i-1)*3.5,0,-15-i*4); scene.add(o); opponents.push(o);});
+ animate();
+}
+function showMsg(t){document.getElementById('msg').textContent=t; setTimeout(()=>{if(playing)document.getElementById('msg').textContent='';},1200);}
+function startGame(){playing=true; lap=1; totalDist=0; oppDist=[0,0,0]; coins=0; curPower='None'; px=0; speed=0; document.getElementById('start').style.display='none'; document.getElementById('over').style.display='none'; showMsg('🚦 3...2...1... GO!');}
 function usePower(){
- if(curPower=='None'){showMsg('⚡ Pehle 🎁 uthao!');return;}
- if(curPower=='Rocket'){enemies.forEach(e=>{e.el.remove();});enemies=[];score+=200;showMsg('🚀 ROCKET! SAB UR GAYE!');}
- if(curPower=='Boost'){boost=120;showMsg('🔥 SUPER
+ if(curPower=='None'){showMsg('Pehle 🎁 uthao!');return;}
+ if(curPower=='Rocket'){opponents.forEach(o=>{o.position.z-=25;}); showMsg('🚀 ROCKET! SAB PEECHE!');}
+ if(curPower=='Boost'){speed=1.6; setTimeout(()=>speed=0.8,3000); showMsg('🔥 SUPER BOOST!');}
+ if(curPower=='Shield'){showMsg('🛡️ SHIELD!');}
+ curPower='None'; document.getElementById('power').textContent='None';
+}
+function spawnPower(){let b=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.2,1.2),new THREE.MeshLambertMaterial({color:0xa55eea})); b.position.set([-4,0,4][Math.floor(Math.random()*3)],1,-120); scene.add(b); powerBoxes.push(b);}
+function spawnCoin(){let c=new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.7,0.2,18),new THREE.MeshLambertMaterial({color:0xffd700})); c.rotation.x=Math.PI/2; c.position.set([-4,0,4][Math.floor(Math.random()*3)],1,-120); scene.add(c); coinsArr.push(c);}
+function animate(){
+ requestAnimationFrame(animate);
+ if(playing){
+  frame++; if(left&&px>-4)px-=0.12; if(right&&px<4)px+=0.12; player.position.x+=(px-player.position.x)*0.2; player.position.z=0;
+  if(speed<0.8) speed+=0.002; totalDist+=speed;
+  if(totalDist>400){lap++; totalDist=0; if(lap>3){playing=false; let myPos=oppDist.filter(d=>d>totalDist).length+1; document.getElementById('result').textContent=myPos==1?'🏆 YOU WIN! 1st!':'🏁 '+myPos+'th - Dobara Try Karo!'; document.getElementById('finalCoins').textContent=coins; document.getElementById('over').style.display='block';}}
+  opponents.forEach((o,i)=>{ o.position.z+= (0.55+Math.random()*0.01) - speed; oppDist[i]+=0.55; if(o.position.z>20)o.position.z=-120; if(o.position.z<-120)o.position.z=20; o.position.x=Math.sin(frame*0.01+i)*3; });
+  if(frame%150==0) spawnPower(); if(frame%90==0) spawnCoin();
+  powerBoxes.forEach((b,i)=>{ b.position.z+=speed*2; b.rotation.y+=0.05; if(b.position.z>10){scene.remove(b); powerBoxes.splice(i,1);} if(Math.abs(b.position.z)<2 && Math.abs(b.position.x-player.position.x)<1.5){scene.remove(b); powerBoxes.splice(i,1); curPower=['Rocket','Boost','Shield'][Math.floor(Math.random()*3)]; document.getElementById('power').textContent=curPower; showMsg('🎁 MILA: '+curPower+'! ⚡ dabao!');}});
+  coinsArr.forEach((c,i)=>{ c.position.z+=speed*2; c.rotation.z+=0.1; if(c.position.z>10){scene.remove(c); coinsArr.splice(i,1);} if(Math.abs(c.position.z)<2 && Math.abs(c.position.x-player.position.x)<1.5){scene.remove(c); coinsArr.splice(i,1); coins+=5; showMsg('🪙 +5!');}});
+  // HUD
+  let ahead=oppDist.filter(d=>d>totalDist+(lap-1)*400).length; document.getElementById('pos').textContent=(ahead+1)+'/4'; document.getElementById('lap').textContent=lap+'/3'; document.getElementById('coins').textContent=coins;
+  camera.position.set(player.position.x*0.6,5,9); camera.lookAt(player.position.x*0.6,1,-10);
+ }
+ renderer.render(scene,camera);
+}
+init();
+</script></body></html>
