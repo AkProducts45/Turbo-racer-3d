@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AK Car Racing</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;touch-action:none}
+body{background:#111;color:#fff;overflow:hidden;text-align:center}
+#top{padding:12px;background:#222;display:flex;justify-content:space-between}
+#top b{color:#ffcc00;font-size:18px}
+#game{position:relative;width:100%;max-width:400px;height:520px;margin:10px auto;background:#333;overflow:hidden;border:3px solid #fff;border-radius:12px}
+#road{position:absolute;left:50%;transform:translateX(-50%);width:260px;height:100%;background:#444;border-left:4px dashed #ffcc00;border-right:4px dashed #ffcc00}
+.line{position:absolute;left:50%;width:6px;height:60px;background:#fff;transform:translateX(-50%)}
+#player{position:absolute;bottom:20px;left:110px;width:50px;height:90px;background:#ff3b30;border-radius:12px;text-align:center;font-size:32px;line-height:90px;z-index:5;box-shadow:0 0 15px #000}
+.enemy{position:absolute;width:50px;height:90px;background:#00aaff;border-radius:12px;text-align:center;font-size:32px;line-height:90px}
+#controls{display:flex;justify-content:center;gap:20px;margin-top:5px}
+#controls button{width:80px;height:70px;font-size:35px;border-radius:50%;border:0;background:#ff3b30;color:#fff}
+#startBtn{background:#25D366;color:#fff;border:0;padding:14px 30px;border-radius:25px;font-size:18px;font-weight:bold;margin-top:10px}
+#over{position:absolute;top:40%;left:0;right:0;background:rgba(0,0,0,.85);padding:20px;display:none;z-index:10}
+</style>
+</head>
+<body>
+<div id="top"><span>SCORE: <b id="score">0</b></span><span>SPEED: <b id="speed">0</b></span></div>
+<div id="game">
+<div id="road"></div>
+<div id="player">🚗</div>
+<div id="over"><h2>💥 GAME OVER!</h2><p style="margin:10px">Score: <b id="finalScore">0</b></p><button id="startBtn" onclick="startGame()">🔄 DOBARA KHELO</button></div>
+</div>
+<p style="opacity:.7;font-size:13px">👈 Left / Right dabake car chalao</p>
+<div id="controls">
+<button onpointerdown="moveLeft=true" onpointerup="moveLeft=false" onpointerleave="moveLeft=false">◀️</button>
+<button onpointerdown="moveRight=true" onpointerup="moveRight=false" onpointerleave="moveRight=false">▶️</button>
+</div>
+<button id="startBtn" onclick="startGame()">▶️ GAME START KARO</button>
+
+<script>
+let player=document.getElementById('player');
+let game=document.getElementById('game');
+let scoreEl=document.getElementById('score');
+let speedEl=document.getElementById('speed');
+let over=document.getElementById('over');
+let px=110, score=0, speed=5, playing=false, moveLeft=false, moveRight=false;
+let enemies=[], lines=[];
+
+for(let i=0;i<4;i++){
+  let l=document.createElement('div'); l.className='line'; l.style.top=(i*140)+'px';
+  game.appendChild(l); lines.push(l);
+}
+
+function startGame(){
+  playing=true; score=0; speed=5; px=110; enemies.forEach(e=>e.remove()); enemies=[];
+  over.style.display='none'; player.style.left=px+'px';
+  requestAnimationFrame(loop);
+}
+function spawnEnemy(){
+  let e=document.createElement('div'); e.className='enemy';
+  let colors=['🚙','🚕','🚓','🚑']; e.innerHTML=colors[Math.floor(Math.random()*colors.length)];
+  let x=[15,110,205][Math.floor(Math.random()*3)];
+  e.style.left=x+'px'; e.style.top='-100px'; game.appendChild(e); enemies.push({el:e, y:-100, x:x});
+}
+let lastSpawn=0;
+function loop(t){
+  if(!playing) return;
+  score++; if(score%500==0) speed+=0.5;
+  scoreEl.textContent=score; speedEl.textContent=Math.round(speed*20);
+  lines.forEach(l=>{ let top=parseInt(l.style.top)+speed; if(top>520) top=-60; l.style.top=top+'px'; });
+  if(moveLeft && px>15) px-=7;
+  if(moveRight && px<205) px+=7;
+  player.style.left=px+'px';
+  if(t-lastSpawn>900){ spawnEnemy(); lastSpawn=t; }
+  enemies.forEach((en,idx)=>{
+    en.y+=speed; en.el.style.top=en.y+'px';
+    if(en.y>520){ en.el.remove(); enemies.splice(idx,1); }
+    // Collision
+    if(en.y+90>400 && en.y<490 && Math.abs(en.x-px)<45){
+      playing=false; document.getElementById('finalScore').textContent=score; over.style.display='block';
+    }
+  });
+  if(playing) requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
