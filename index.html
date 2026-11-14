@@ -1,85 +1,48 @@
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Turbo Racer 3D - AK</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:#000;color:#fff;overflow:hidden;text-align:center}
-#hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px 15px;background:rgba(0,0,0,.6);z-index:10;font-weight:bold}#hud b{color:#ffcc00}
-#title{position:absolute;top:40px;left:0;right:0;z-index:10;font-size:20px;text-shadow:0 0 10px #000}
-#controls{position:absolute;bottom:15px;left:0;right:0;display:flex;justify-content:center;gap:15px;z-index:10}
-#controls button{width:75px;height:75px;border-radius:50%;border:2px solid #fff;font-size:30px;background:rgba(255,255,255,.2);color:#fff}
-#nitro{background:#ff3b30!important;box-shadow:0 0 20px red}
-#start{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);z-index:20;background:#25D366;border:0;padding:16px 35px;border-radius:30px;color:#fff;font-size:20px;font-weight:bold}
-#over{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);z-index:20;background:rgba(0,0,0,.9);padding:25px;border-radius:20px;border:2px solid #ffcc00;display:none}
-#msg{position:absolute;top:80px;left:0;right:0;z-index:10;font-size:24px;font-weight:bold;color:#ffcc00;text-shadow:0 0 10px #000}
+<title>AK Beach Buggy</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:#87ceeb;overflow:hidden;text-align:center}
+#top{display:flex;justify-content:space-between;padding:10px 15px;background:#ff6b00;color:#fff;font-weight:bold;font-size:15px}
+#top b{color:#ffe600}
+#game{position:relative;width:100%;max-width:420px;height:520px;margin:5px auto;background:linear-gradient(#87ceeb 0%, #ffeaa7 30%, #fdcb6e 100%);overflow:hidden;border:4px solid #ff6b00;border-radius:15px}
+#sandL,#sandR{position:absolute;top:0;bottom:0;width:65px;background:#fdcb6e;z-index:1}
+#sandL{left:0}#sandR{right:0}
+#road{position:absolute;left:50%;transform:translateX(-50%);width:290px;height:100%;background:#555;border-left:5px solid #fff;border-right:5px solid #fff;z-index:2}
+.palm{position:absolute;font-size:32px;z-index:3}
+.line{position:absolute;left:50%;transform:translateX(-50%);width:8px;height:50px;background:#ffe600;z-index:2}
+#player{position:absolute;bottom:25px;left:165px;width:60px;height:95px;background:#ff3838;border-radius:15px 15px 5px 5px;font-size:42px;line-height:95px;z-index:10;box-shadow:0 0 20px #ff3838;transition:0.08s}
+.enemy,.coin,.power{position:absolute;border-radius:12px;text-align:center;z-index:5}
+.enemy{width:60px;height:95px;background:#3498db;font-size:42px;line-height:95px}
+.coin{width:42px;height:42px;background:gold;border-radius:50%;font-size:24px;line-height:42px;box-shadow:0 0 15px gold}
+.power{width:50px;height:50px;background:#a55eea;border-radius:50%;font-size:28px;line-height:50px;box-shadow:0 0 15px #a55eea}
+#controls{display:flex;justify-content:center;gap:12px;margin-top:5px}
+#controls button{width:72px;height:72px;border-radius:50%;border:0;font-size:30px;background:#333;color:#fff}
+#powerBtn{background:#a55eea!important;box-shadow:0 0 20px #a55eea}
+#startBtn{background:#ff6b00;border:0;padding:14px 35px;border-radius:30px;color:#fff;font-size:18px;font-weight:bold;margin-top:8px}
+#over{position:absolute;top:30%;left:10px;right:10px;background:rgba(0,0,0,.92);padding:20px;display:none;z-index:30;border-radius:15px;border:3px solid #ff6b00;color:#fff}
+#msg{position:absolute;top:10px;left:0;right:0;font-size:22px;font-weight:bold;color:#ff3838;z-index:20;text-shadow:2px 2px 0 #fff}
+#powerBar{position:absolute;top:45px;left:10px;right:10px;background:#fff;border-radius:10px;padding:5px;font-size:13px;color:#000;z-index:20}
 </style></head><body>
-<div id="hud"><span>🪙 <b id="coins">0</b></span><span>SCORE: <b id="score">0</b></span><span>❤️ <b id="lives">3</b></span><span>🔥 <b id="speed">0</b></span></div>
-<div id="title">🏎️ TURBO RACER 3D - LAHORE</div>
-<div id="msg"></div>
-<button id="start" onclick="startGame()">▶️ GAME START</button>
-<div id="over"><h2>💥 GAME OVER</h2><p style="margin:12px">Score: <b id="final">0</b></p><button onclick="startGame()" style="background:#25D366;border:0;padding:12px 25px;border-radius:20px;color:#fff;font-weight:bold">🔄 DOBARA KHELO</button></div>
-<div id="controls"><button onpointerdown="left=true" onpointerup="left=false" onpointerleave="left=false">◀️</button><button id="nitro" onpointerdown="nitro=true" onpointerup="nitro=false">🔥</button><button onpointerdown="right=true" onpointerup="right=false" onpointerleave="right=false">▶️</button></div>
+<div id="top"><span>🪙 <b id="coins">0</b></span><span>SCORE: <b id="score">0</b></span><span>❤️ <b id="lives">3</b></span><span>🏆 <b id="pos">1st</b></span></div>
+<h2 style="color:#d35400">🏖️ AK BEACH BUGGY 🚜</h2>
+<div id="game"><div id="sandL"></div><div id="sandR"></div><div id="road"></div><div id="msg"></div><div id="powerBar">⚡ POWER: <b id="power">None</b> - Power Box uthao!</div><div id="player">🚜</div>
+<div id="over"><h2>🏁 RACE KHATAM!</h2><p style="margin:12px">Score: <b id="finalScore">0</b> | Coins: <b id="finalCoins">0</b></p><button id="startBtn" onclick="startGame()">🔄 DOBARA RACE</button></div></div>
+<div id="controls"><button onpointerdown="ml=true" onpointerup="ml=false" onpointerleave="ml=false">◀️</button><button id="powerBtn" onclick="usePower()">⚡</button><button onpointerdown="mr=true" onpointerup="mr=false" onpointerleave="mr=false">▶️</button></div>
+<button id="startBtn" onclick="startGame()">▶️ RACE START</button>
 <script>
-let scene,camera,renderer,player,roadLines=[],enemies=[],coinsArr=[],buildings=[],trees=[];
-let score=0,coins=0,lives=3,speed=0,playing=false,left=false,right=false,nitro=false,px=0,frame=0;
-function init(){
- scene=new THREE.Scene(); scene.background=new THREE.Color(0x87ceeb); scene.fog=new THREE.Fog(0x87ceeb, 30, 120);
- camera=new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 300);
- renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(innerWidth, innerHeight); document.body.appendChild(renderer.domElement);
- // Lights
- scene.add(new THREE.AmbientLight(0xffffff, 0.8)); let sun=new THREE.DirectionalLight(0xffffff,0.8); sun.position.set(10,20,10); scene.add(sun);
- // Ground
- let ground=new THREE.Mesh(new THREE.PlaneGeometry(200,400), new THREE.MeshLambertMaterial({color:0x2e8b57})); ground.rotation.x=-Math.PI/2; ground.position.z=-100; scene.add(ground);
- // Road
- let road=new THREE.Mesh(new THREE.PlaneGeometry(12,400), new THREE.MeshLambertMaterial({color:0x333333})); road.rotation.x=-Math.PI/2; road.position.z=-100; scene.add(road);
- // Road lines
- for(let i=0;i<20;i++){ let l=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.1,4), new THREE.MeshBasicMaterial({color:0xffffff})); l.position.set(0,0.1,-i*20); scene.add(l); roadLines.push(l); }
- // Player Car - 3D
- player=new THREE.Group();
- let body=new THREE.Mesh(new THREE.BoxGeometry(2,0.8,4), new THREE.MeshLambertMaterial({color:0xff0000})); body.position.y=0.7; player.add(body);
- let cabin=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.7,2), new THREE.MeshLambertMaterial({color:0x111111})); cabin.position.y=1.4; cabin.position.z=0.2; player.add(cabin);
- let spoiler=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.2,0.5), new THREE.MeshLambertMaterial({color:0x000000})); spoiler.position.set(0,1,-2); player.add(spoiler);
- // Wheels
- [[-1.1,1.5],[1.1,1.5],[-1.1,-1.5],[1.1,-1.5]].forEach(p=>{ let w=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.4,12), new THREE.MeshLambertMaterial({color:0x000000})); w.rotation.z=Math.PI/2; w.position.set(p[0],0.5,p[1]); player.add(w); });
- player.position.set(0,0,0); scene.add(player);
- camera.position.set(0,5,8); camera.lookAt(0,1,-10);
- animate();
-}
-function makeEnemy(){
- let g=new THREE.Group(); let colors=[0x0000ff,0xffff00,0xffffff,0x00ff00];
- let b=new THREE.Mesh(new THREE.BoxGeometry(2,0.8,4), new THREE.MeshLambertMaterial({color:colors[Math.floor(Math.random()*colors.length)]})); b.position.y=0.7; g.add(b);
- let c=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.7,2), new THREE.MeshLambertMaterial({color:0x111111})); c.position.y=1.4; g.add(c);
- let lanes=[-4,0,4]; g.position.set(lanes[Math.floor(Math.random()*3)],0,-120); scene.add(g); enemies.push(g);
-}
-function makeCoin(){
- let c=new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.8,0.2,20), new THREE.MeshLambertMaterial({color:0xffd700})); c.rotation.x=Math.PI/2;
- let lanes=[-4,0,4]; c.position.set(lanes[Math.floor(Math.random()*3)],1,-120); scene.add(c); coinsArr.push(c);
-}
-function makeBuilding(){
- let h=8+Math.random()*15; let b=new THREE.Mesh(new THREE.BoxGeometry(6,h,6), new THREE.MeshLambertMaterial({color:Math.random()*0xffffff})); let side=Math.random()>0.5?12:-12; b.position.set(side,h/2,-120); scene.add(b); buildings.push(b);
-}
-function showMsg(t){ document.getElementById('msg').textContent=t; setTimeout(()=>document.getElementById('msg').textContent='',1200); }
-function startGame(){
- if(!scene) init();
- playing=true; score=0; coins=0; lives=3; px=0; speed=0;
- enemies.forEach(e=>scene.remove(e)); coinsArr.forEach(c=>scene.remove(c)); buildings.forEach(b=>scene.remove(b)); enemies=[];coinsArr=[];buildings=[];
- document.getElementById('start').style.display='none'; document.getElementById('over').style.display='none'; showMsg('🚦 GO GO GO!');
-}
-function animate(){
- requestAnimationFrame(animate);
- if(playing){
-  frame++; let curSpeed=nitro?1.2:0.7; speed=Math.round(curSpeed*180);
-  if(left&&px>-4) px-=0.15; if(right&&px<4) px+=0.15; player.position.x+=(px-player.position.x)*0.2; player.rotation.z=left?0.1:right?-0.1:0;
-  score+=nitro?2:1;
-  roadLines.forEach(l=>{ l.position.z+=curSpeed*2; if(l.position.z>10) l.position.z=-190; });
-  if(frame%80==0) makeEnemy(); if(frame%120==0) makeCoin(); if(frame%60==0) makeBuilding();
-  enemies.forEach((e,i)=>{ e.position.z+=curSpeed*1.8; if(e.position.z>10){scene.remove(e);enemies.splice(i,1);}
-   if(Math.abs(e.position.z-player.position.z)<3 && Math.abs(e.position.x-player.position.x)<1.8){ scene.remove(e); enemies.splice(i,1); lives--; navigator.vibrate&&navigator.vibrate(300); if(lives<=0){ playing=false; document.getElementById('final').textContent=score; document.getElementById('over').style.display='block'; } else showMsg('💥 TAKKAR! '+lives+' LIVES'); } });
-  coinsArr.forEach((c,i)=>{ c.position.z+=curSpeed*1.8; c.rotation.z+=0.1; if(c.position.z>10){scene.remove(c);coinsArr.splice(i,1);}
-   if(Math.abs(c.position.z-player.position.z)<2 && Math.abs(c.position.x-player.position.x)<1.5){ scene.remove(c); coinsArr.splice(i,1); coins+=5; score+=100; showMsg('🪙 +5 COINS!'); } });
-  buildings.forEach((b,i)=>{ b.position.z+=curSpeed*1.8; if(b.position.z>10){scene.remove(b);buildings.splice(i,1);} });
-  document.getElementById('score').textContent=score; document.getElementById('coins').textContent=coins; document.getElementById('lives').textContent=lives; document.getElementById('speed').textContent=speed;
- }
- renderer.render(scene,camera);
-}
-init();
-</script></body></html>
+let player=document.getElementById('player'),game=document.getElementById('game');
+let score=0,coins=0,lives=3,playing=false,ml=false,mr=false,px=165,curPower='None',speed=5,boost=0,shield=false;
+let enemies=[],coinsArr=[],powers=[],lines=[],palms=[];
+for(let i=0;i<5;i++){let l=document.createElement('div');l.className='line';l.style.top=(i*120)+'px';game.appendChild(l);lines.push(l);}
+for(let i=0;i<6;i++){let p=document.createElement('div');p.className='palm';p.textContent=Math.random()>0.5?'🌴':'🌊';p.style.top=(i*90)+'px';p.style.left=Math.random()>0.5?'5px':'375px';game.appendChild(p);palms.push(p);}
+function showMsg(t){let m=document.getElementById('msg');m.textContent=t;setTimeout(()=>m.textContent='',1400);}
+function startGame(){playing=true;score=0;coins=0;lives=3;px=165;curPower='None';boost=0;shield=false;
+enemies.forEach(e=>e.el.remove());coinsArr.forEach(c=>c.el.remove());powers.forEach(p=>p.el.remove());enemies=[];coinsArr=[];powers=[];
+document.getElementById('over').style.display='none';document.getElementById('power').textContent='None';showMsg('🚦 READY... GO BEACH!');requestAnimationFrame(loop);}
+function spawnEnemy(){let e=document.createElement('div');e.className='enemy';e.innerHTML=['🚙','🛺','🚕','🚓'][Math.floor(Math.random()*4)];let x=[15,105,195][Math.floor(Math.random()*3)];e.style.left=x+'px';e.style.top='-100px';game.appendChild(e);enemies.push({el:e,y:-100,x:x});}
+function spawnCoin(){let c=document.createElement('div');c.className='coin';c.innerHTML='🪙';let x=[20,110,200][Math.floor(Math.random()*3)];c.style.left=x+'px';c.style.top='-40px';game.appendChild(c);coinsArr.push({el:c,y:-40,x:x});}
+function spawnPower(){let p=document.createElement('div');p.className='power';p.innerHTML='🎁';let x=[20,110,200][Math.floor(Math.random()*3)];p.style.left=x+'px';p.style.top='-50px';game.appendChild(p);powers.push({el:p,y:-50,x:x});}
+function usePower(){
+ if(curPower=='None'){showMsg('⚡ Pehle 🎁 uthao!');return;}
+ if(curPower=='Rocket'){enemies.forEach(e=>{e.el.remove();});enemies=[];score+=200;showMsg('🚀 ROCKET! SAB UR GAYE!');}
+ if(curPower=='Boost'){boost=120;showMsg('🔥 SUPER
